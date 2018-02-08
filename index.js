@@ -3,53 +3,13 @@ const app = express()
 const bodyParser = require('body-parser')
 const cors = require('cors')
 const morgan = require('morgan')
+const Person = require('./models/person')
 
 app.use(express.static('build'))
 app.use(bodyParser.json())
 app.use(cors())
 
 app.use(morgan('tiny'))
-morgan.token('persons', (req, res) => JSON.stringify(req.body))
-app.use(
-    morgan(':method :url :persons :status :res[content-length] :response-time ms')
-)
-
-const mongoose = require('mongoose')
-const url = 'mongodb://kokopino:verkonpaino@ds227858.mlab.com:27858/puhuttelu'
-mongoose.connect(url)
-
-const Person = mongoose.model('Person', {
-    name: String,
-    number: String
-})
-
-let persons = [
-    {
-        "name": "Arto Hellas",
-        "number": "040-123456",
-        "id": 1
-    },
-    {
-        "name": "Martti Tienari",
-        "number": "040-123456",
-        "id": 2
-    },
-    {
-        "name": "Arto Järvinen",
-        "number": "040-123456",
-        "id": 3
-    },
-    {
-        "name": "Tuomas",
-        "number": "0440-666698",
-        "id": 5
-    },
-    {
-        "name": "Dušica",
-        "number": "045045045",
-        "id": 6
-    }
-]
 
 app.get('/info', (req, res) => {
     const lkm = persons.length
@@ -57,15 +17,19 @@ app.get('/info', (req, res) => {
     res.send(`<p>puhelinluettelossa on ${lkm} henkilön tiedot</p><p>${aika}</p>`)
 })
 
-app.get('/api/persons', (req, res) => {
+const formatPerson = (person) => {
+    return {
+        name: person.name,
+        number: person.number,
+        id: person.id
+    }
+}
+
+app.get('/api/persons', (request, response) => {
     Person
         .find({})
         .then(persons => {
-            console.log(`Puhelinluettelo:`)
-            persons.forEach(person => {
-                console.log(printOne(person))
-            })
-            mongoose.connection.close()
+            response.json(persons.map(formatPerson))
         })
 })
 
