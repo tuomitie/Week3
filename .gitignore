@@ -5,6 +5,7 @@
 
 # testing
 /coverage
+mongo.js
 
 # misc
 .DS_Store

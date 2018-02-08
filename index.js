@@ -14,6 +14,13 @@ app.use(
     morgan(':method :url :persons :status :res[content-length] :response-time ms')
 )
 
+const mongoose = require('mongoose')
+
+const Person = mongoose.model('Person', {
+    name: String,
+    number: String
+})
+
 let persons = [
     {
         "name": "Arto Hellas",
@@ -49,7 +56,15 @@ app.get('/info', (req, res) => {
 })
 
 app.get('/api/persons', (req, res) => {
-    res.json(persons)
+    Person
+        .find({})
+        .then(persons => {
+            console.log(`Puhelinluettelo:`)
+            persons.forEach(person => {
+                console.log(printOne(person))
+            })
+            mongoose.connection.close()
+        })
 })
 
 app.get('/api/persons/:id', (request, response) => {
